@@ -14,12 +14,12 @@ if runVerbose
 end
 if isThisOctave
     HMALibrary = xlsread(dataImport,'materialsCatalog','b10:l34');
-    granularLibrary = xlsread(dataImport,'materialsCatalog','b39:aa83');
+    granularLibrary = xlsread(dataImport,'materialsCatalog','b39:aa89');
     % CTBLibrary
     % subGradeLibrary    
 else   
     HMALibrary = xlsread(dataImport,'materialsCatalog','b10:l34');
-    granularLibrary = xlsread(dataImport,'materialsCatalog','b39:aa83');
+    granularLibrary = xlsread(dataImport,'materialsCatalog','b39:aa89');
     % CTBLibrary
     % subGradeLibrary
 end
