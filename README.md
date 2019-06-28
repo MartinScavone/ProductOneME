@@ -8,7 +8,7 @@ creativecommons.org/licenses/by-sa/4.0/
   2) Acknowledge that Product-One and its source code are given AS-IS, and without warranty of fitting any particular purpose. Release the author (Scavone, M) of any liability that may result as a consequence (either direct or indirect) of the use, lack of use, or misuse of Product-One. As the end-user of Product-One, you are expected to analyze and construe the results given by Product-One and rely on your engineering judegement.
   
 --------------------------
-(1) Ref: Scavone, M. (2019): "IMPLEMENTATION OF A MECHANISTIC-EMPIRICAL PAVEMENT DESIGN METHOD FOR URUGUAYAN ROADWAYS". M. Sc. Thesis. Virginia Polytechnic Institute and State University. Blacksburg, VA, USA.
+(1) Ref: Scavone, M. (2019): "IMPLEMENTATION OF A MECHANISTIC-EMPIRICAL PAVEMENT DESIGN METHOD FOR URUGUAYAN ROADWAYS". M. Sc. Thesis. Virginia Polytechnic Institute and State University. Blacksburg, VA, USA. Available at: https://vtechworks.lib.vt.edu/handle/10919/90777
 
 -------------------------
 
