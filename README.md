@@ -21,4 +21,11 @@ You may want to have different spreadsheets with inputs for different projects, 
 Upon execution, Product-One will ask you the name of the input data spreadsheet, go the interpreter's main command window and write accordingly.
 * Refer to Scavone (2019) [full citation above] for further insight on the contents of Product-One.
 
+------------------------
+# GNU-Octave users read this:
+Product-One makes use of the excel-spreadsheet read/write functions (xlsread and xlswrite) to read the problem inputs and write results, and the "datetime" function for plotting results. None of these functions are shipped with Octave by default, so you must install them prior to running Product-One. 
+If you run Product-One and don't have these packages installed in your system, Product-One would issue a warning prompting you to do so, and pop an error right afterwards (Product-One checks for these packages in the 'integrityCheck' script, it looks for the xls*** and datetime functions in the Octave environment, and tries to load the packages case these are not around).
+
+The xlsread and xlswrite functions are part of the 'io' package, which is available through the Octave-Forge. 
+The datetime function is part of the 'Chrono' package by A.P.Janke, which is available at: https://github.com/apjanke/octave-chrono. If you cannot install 'Chrono' from the linked source, I copied a tarball version of it I managed to put to run while testing the software (see the 'dependencies' folder). 'Chrono' is (C) by A. P. Janke, and distributed under the GPL v3 License. 
 
