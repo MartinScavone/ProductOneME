@@ -1,6 +1,10 @@
 %%%%  PRODUCT-ONE - M.E. Pavement Design tool - %%%%
 %%% FRONT-END SCRIPT for the MULTI-LYR LINEAR ELASTIC ANALYSIS TOOL%%%
 %
+%%V 0.81 2019-07-21
+%   Changelog: simplified calculations for the load radii of different loads, and distance 
+%   and angle values for each stress and strain evaluation point
+%
 %%V 0.8 2019-05-20
     %Changelog: Rolled back some angle corrections (was pointing to pi rad - actual angle
     %
@@ -171,7 +175,9 @@ layersv = [auxv_HMA; layersv];         %repeat to get the Poissons
 
 for j = 1:nax     
     %update v2019-03-19: replaced r=0 with r=0.01m
-    rSingleL(j,:) = [0.01 0.5*0.01*aSingleLight(j) 0.01*aSingleLight(j) 0.01*aSingleLight(j) + 0.10];
+    aj = 0.01*aSingleLight(j);
+    qj = 1/2*9800*axlesSingleLWeights(j)/(pi*(aj)^2);
+    rSingleL(j,:) = [0.01 0.5*aj aj aj+0.10];
     %for i = 1:nrsL
         %get axle Load (tons), convert to load by wheel -> That's axleSingleLWeights(j)/2
         %get load radius - - - - computed with wheelFootprint (called from the MainCode) - - IT'S GIVEN IN CM and accounts for the fact that the axle load is equally divided over all the axle's wheels!
@@ -181,9 +187,7 @@ for j = 1:nax
        %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
        if axlesSingleLight(k,j)~=0   %"if there's actual traffic of these axles"
            %%update V2019-03-31:: pass pressure instead of total load to MLE_sigma.
-           %%update V2019-05-14: Add 4th dimension to sigmaXXX outputs from %MLE
-           aj = 0.01*aSingleLight(j);
-           qj = 1/2*9800*axlesSingleLWeights(j)/(pi*(aj)^2);
+           %%update V2019-05-14: Add 4th dimension to sigmaXXX outputs from %MLE           
            [sigmaZsingleL(:,:,j,k),sigmaXsingleL(:,:,j,k),sigmaYsingleL(:,:,j,k)] = MLE_sigma(qj,aj,rSingleL(j,:),z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
        end
      %create these auxiliar auxE and aux_Poisson variables with the E and v for this load level to use with the conversion to strain        %equations
@@ -224,7 +228,9 @@ layersv = [auxv_HMA; layersv];         %repeat to get the Poissons
 
 for j = 1:nax
     %update v2019-03-19: replaced r=0 with r=0.01m
-    rSingle6(j,:) = [0.01 0.5*0.01*aSingle6(j) 0.01*aSingle6(j) 0.01*aSingle6(j)+0.10];
+    aj = 0.01*aSingle6(j);
+    qj = 1/2*9800*axlesSingle6Weights(j)/(pi*(aj)^2);
+    rSingle6(j,:) = [0.01 0.5*aj aj aj+0.10];
     %for i = 1:nrs
         %get axle Load (tons), convert to load by wheel -> That's axleSingleLWeights(j)/2
         %get load radius - - - - computed with wheelFootprint (called from the MainCode) - - IT'S GIVEN IN CM and accounts for the fact that the axle load is equally divided over all the axle's wheels!
@@ -235,9 +241,7 @@ for j = 1:nax
             %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
             %%update V2019-03-31:: pass pressure [qj] instead of total load to MLE_sigma.
             %%update V2019-05-14: Add 4th dimension to sigmaXXX outputs from %MLE
-            aj = 0.01*aSingle6(j);
-            qj = 1/2*9800*axlesSingle6Weights(j)/(pi*(aj)^2);
-        	[sigmaZsingle6(:,:,j,k),sigmaXsingle6(:,:,j,k),sigmaYsingle6(:,:,j,k)] = MLE_sigma(qj,aj,rSingle6(j,:),z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
+            [sigmaZsingle6(:,:,j,k),sigmaXsingle6(:,:,j,k),sigmaYsingle6(:,:,j,k)] = MLE_sigma(qj,aj,rSingle6(j,:),z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
        end
      %create these auxiliar auxE and aux_Poisson variables with the E and v for this load level to use with the conversion to strain        %equations
      auxLayersE = getAuxEfromE(0.01*cumsum(paveDepths),z,layersE(:,j));   %%stretch to the z domain, will need it to superimpose the horizontal stresses  [although not needed in single and 6-ton axles...]
@@ -281,8 +285,10 @@ for j = 1:nax
     rSingle10(j,:) = 0:1:5;
     %since I need to compose the effects of the dual wheels (and rSingle10 measures from the midpoint between the two wheels' centers (as in the MEPDG), I need to define respective r vectors for each.
     %auxR1 and auxR2 are the radial distance to each wheel from each rSingle10 position [calculated manually elsewhere]
-    auxR1 = [0.5*dualWheelSep 0.75*dualWheelSep-0.5*0.01*aSingle105(j) dualWheelSep-0.01*aSingle105(j) dualWheelSep dualWheelSep+0.01*aSingle105(j) dualWheelSep+0.01*aSingle105(j)+0.10];
-    auxR2 = [0.5*dualWheelSep 0.25*dualWheelSep+0.5*0.01*aSingle105(j) 0.01*aSingle105(j) 0.01 0.01*aSingle105(j) 0.01*aSingle105(j)+0.10];
+    aj = 0.01*aSingle105(j);
+    qj = 1/4*9800*axlesSingle10Weights(j)/(pi*(aj)^2);
+    auxR1 = [0.5*dualWheelSep 0.75*dualWheelSep-0.5*aj dualWheelSep-aj dualWheelSep dualWheelSep+aj dualWheelSep+aj+0.10];
+    auxR2 = [0.5*dualWheelSep 0.25*dualWheelSep+0.5*aj aj 0.01 aj aj+0.10];
     auxAlpha1 = zeros(1,6);   %%update v2019-05-20... rolled back these angles
     auxAlpha2 = [pi pi pi 0 0 0];
     %for the rotation calculations, extend auxAlpha1 and auxAlpha2 to the size of auxSigmaX1 and auxSigmaY2 (z x r)
@@ -299,8 +305,6 @@ for j = 1:nax
        if axlesSingle105(k,j)~=0   %"if there's actual traffic of these axles and load value"
             %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
              %update V2019-03-31:: pass pressure [qj] instead of total load to MLE_sigma.
-            aj = 0.01*aSingle105(j);
-            qj = 1/4*9800*axlesSingle10Weights(j)/(pi*(aj)^2);
             [auxSigmaZ1,auxSigmaR1,auxSigmaT1] = MLE_sigma(qj,aj,auxR1,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ2,auxSigmaR2,auxSigmaT2] = MLE_sigma(qj,aj,auxR2,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
        else
@@ -366,12 +370,14 @@ layersv = [auxv_HMA; layersv];         %repeat to get the Poissons
 for j = 1:nax
     %update v2019-03-19: replaced r=0 in auxR1-auxR2 with r=0.01m
     rTandem10(j,:) = 0:1:5;
+    aj = 0.01*aTandem10(j);
+    qj = 1/4*9800*axlesTandem10Weights(j)/(pi*(aj)^2);
     %since I need to compose the effects of the dual wheels (and rTandem10 measures from the midpoint between the two axles' centers, I need to define respective r vectors for each.
     %auxR1 and auxR2 are the radial distance to each wheel from each rSingle10 position [calculated manually elsewhere]
-    auxR1 = [0.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(0.01*aTandem10(j))^2) sqrt((0.5*tandemAxleSep)^2+(0.01*aTandem10(j)+0.10)^2) tandemAxleSep sqrt(tandemAxleSep^2+(0.01*aTandem10(j))^2) sqrt(tandemAxleSep^2+(0.01*aTandem10(j)+0.10)^2)];
-    auxR2 = [0.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(0.01*aTandem10(j))^2) sqrt((0.5*tandemAxleSep)^2+(0.01*aTandem10(j)+0.10)^2) 0.01 0.01*aTandem10(j) 0.01*aTandem10(j)+0.10];
-    auxAlpha1 = [0.5*pi atan(tandemAxleSep/(2*0.01*aTandem10(j))) atan(tandemAxleSep/(2*0.01*aTandem10(j)+2*0.10)) 0.5*pi atan(tandemAxleSep/(0.01*aTandem10(j))) atan(tandemAxleSep/(0.01*aTandem10(j)+0.10))];
-    auxAlpha2 = [-0.5*pi atan(-tandemAxleSep/(2*0.01*aTandem10(j)))  atan(-tandemAxleSep/(2*0.01*aTandem10(j)+2*0.10)) 0 0 0];
+    auxR1 = [0.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(aj)^2) sqrt((0.5*tandemAxleSep)^2+(aj+0.10)^2) tandemAxleSep sqrt(tandemAxleSep^2+(aj)^2) sqrt(tandemAxleSep^2+(aj+0.10)^2)];
+    auxR2 = [0.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(aj)^2) sqrt((0.5*tandemAxleSep)^2+(aj+0.10)^2) 0.01 aj aj+0.10];
+    auxAlpha1 = [0.5*pi atan(tandemAxleSep/(2*aj)) atan(tandemAxleSep/(2*aj+2*0.10)) 0.5*pi atan(tandemAxleSep/(aj)) atan(tandemAxleSep/(aj+0.10))];
+    auxAlpha2 = [-0.5*pi atan(-tandemAxleSep/(2*aj))  atan(-tandemAxleSep/(2*aj+2*0.10)) 0 0 0];
     %for the rotation calculations, extend auxAlpha1 and auxAlpha2 to the size of auxSigmaX1 and auxSigmaY2 (z x r)
     auxAlpha1 = ones(length(z),1)*auxAlpha1;
     auxAlpha2 = ones(length(z),1)*auxAlpha2;
@@ -380,12 +386,10 @@ for j = 1:nax
     %get E, nu, height for all materials! - watchful for asphalt  %materials!
     
      %%UPDATE 2019-02-19:: DON'T COMPUTE ANYTHING (AND KEEP ZEROS) IF THERE'S 0 TRAFFIC IN THIS CATEGORY.
-      %%update 2019-03-19:: Correted it to properly work for each load      %%level and axle type
+     %%update 2019-03-19:: Correted it to properly work for each load      %%level and axle type
        if axlesTandem10(k,j)~=0   %"if there's actual traffic of these axles"
             %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
             %update V2019-03-31:: pass pressure [qj] instead of total load to MLE_sigma.
-            aj = 0.01*aTandem10(j);
-            qj = 1/4*9800*axlesTandem10Weights(j)/(pi*(aj)^2);
             [auxSigmaZ1,auxSigmaR1,auxSigmaT1] = MLE_sigma(qj,aj,auxR1,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ2,auxSigmaR2,auxSigmaT2] = MLE_sigma(qj,aj,auxR2,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
        else
@@ -451,20 +455,22 @@ for j = 1:nax
     %update V2019-05-20: bug detected in auxAlpha1. Corrected. Also rolled back angle convention
     %update v2019-03-19: replaced r=0 in auxR1-auxR2 with r=0.01m
     rTandem14(j,:) = 0:1:14;
+    aj = 0.01*aTandem14(j);
+    qj = 1/6*9800*axlesTandem14Weights(j)/(pi*(aj)^2);
     %since I need to compose the effects of the THREE wheels (and rTandem14 measures from the center of the outermost wheel in the dualwheel axle, I need to define respective r vectors for each.
     %auxR1 and auxR2 are the radial distance to each wheel from each rSingle10 position [calculated manually elsewhere]
-    auxR1 = [0.01 0.01*aTandem14(j) 0.25*dualWheelSep+0.5*0.01*aTandem14(j) 0.5*dualWheelSep 0.75*dualWheelSep-0.5*0.01*aTandem14(j) dualWheelSep-0.01*aTandem14(j) dualWheelSep dualWheelSep+0.01*aTandem14(j) dualWheelSep+0.01*aTandem14(j)+0.10 ...
-        0.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(0.01*aTandem14(j))^2) sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) tandemAxleSep sqrt((0.01*aTandem14(j))^2+tandemAxleSep^2) sqrt(tandemAxleSep^2+(0.01*aTandem14(j)+0.10)^2)];
-    auxR2 = [dualWheelSep dualWheelSep-0.01*aTandem14(j) 0.75*dualWheelSep-0.5*0.01*aTandem14(j) 0.5*dualWheelSep 0.25*dualWheelSep+0.01*0.5*aTandem14(j) 0.01*aTandem14(j) 0.01 0.01*aTandem14(j) 0.01*aTandem14(j)+0.10 ...
-        sqrt(dualWheelSep^2+(0.5*tandemAxleSep)^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep-0.01*aTandem14(j))^2) sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep-0.01*aTandem14(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep-0.01*aTandem14(j)-0.10)^2)];
-    auxR3 = [tandemAxleSep sqrt(tandemAxleSep^2+(0.01*aTandem14(j))^2) sqrt(tandemAxleSep^2+(0.25*dualWheelSep+0.5*0.01*aTandem14(j))^2) sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.75*dualWheelSep-0.5*0.01*aTandem14(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep-0.01*aTandem14(j))^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTandem14(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTandem14(j)+0.10)^2)...
-        0.5*tandemAxleSep sqrt((0.01*aTandem14(j))^2+(0.5*tandemAxleSep)^2) sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) 0.01 0.01*aTandem14(j) 0.01*aTandem14(j)+0.10];
+    auxR1 = [0.01 aj 0.25*dualWheelSep+0.5*aj 0.5*dualWheelSep 0.75*dualWheelSep-0.5*aj dualWheelSep-aj dualWheelSep dualWheelSep+aj dualWheelSep+aj+0.10 ...
+        0.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(aj)^2) sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) tandemAxleSep sqrt((aj)^2+tandemAxleSep^2) sqrt(tandemAxleSep^2+(aj+0.10)^2)];
+    auxR2 = [dualWheelSep dualWheelSep-aj 0.75*dualWheelSep-0.5*aj 0.5*dualWheelSep 0.25*dualWheelSep+0.01*0.5*aTandem14(j) aj 0.01 aj aj+0.10 ...
+        sqrt(dualWheelSep^2+(0.5*tandemAxleSep)^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep-aj)^2) sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep-aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep-aj-0.10)^2)];
+    auxR3 = [tandemAxleSep sqrt(tandemAxleSep^2+(aj)^2) sqrt(tandemAxleSep^2+(0.25*dualWheelSep+0.5*aj)^2) sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.75*dualWheelSep-0.5*aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep-aj)^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj+0.10)^2)...
+        0.5*tandemAxleSep sqrt((aj)^2+(0.5*tandemAxleSep)^2) sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) 0.01 aj aj+0.10];
     auxAlpha1 = [0 0 0 0 0 0 0 0 0 ...
-        0.5*pi atan(tandemAxleSep/(2*0.01*aTandem14(j))) atan(tandemAxleSep/dualWheelSep) 0.5*pi atan(tandemAxleSep/(0.01*aTandem14(j))) atan(2*tandemAxleSep/dualWheelSep)];
+        0.5*pi atan(tandemAxleSep/(2*aj)) atan(tandemAxleSep/dualWheelSep) 0.5*pi atan(tandemAxleSep/(aj)) atan(2*tandemAxleSep/dualWheelSep)];
     auxAlpha2 = [pi pi pi pi pi pi 0 0 0 ...
-        pi-atan(0.5*tandemAxleSep/dualWheelSep) pi-atan(0.5*tandemAxleSep/(dualWheelSep-0.01*aTandem14(j))) pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(dualWheelSep-0.01*aTandem14(j))) pi-atan(2*tandemAxleSep/dualWheelSep)];
+        pi-atan(0.5*tandemAxleSep/dualWheelSep) pi-atan(0.5*tandemAxleSep/(dualWheelSep-aj)) pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(dualWheelSep-aj)) pi-atan(2*tandemAxleSep/dualWheelSep)];
     auxAlpha3 = [-pi/2 atan(-tandemAxleSep/auxR1(2)) atan(-tandemAxleSep/auxR1(3)) atan(-tandemAxleSep/auxR1(4)) atan(-tandemAxleSep/auxR1(5)) atan(-tandemAxleSep/auxR1(6)) ...
-        atan(-tandemAxleSep/auxR1(7)) atan(-tandemAxleSep/auxR1(8)) atan(-tandemAxleSep/auxR1(9)) -pi/2 atan(-0.5*tandemAxleSep/(0.01*aTandem14(j))) atan(-tandemAxleSep/dualWheelSep) 0 0 0];
+        atan(-tandemAxleSep/auxR1(7)) atan(-tandemAxleSep/auxR1(8)) atan(-tandemAxleSep/auxR1(9)) -pi/2 atan(-0.5*tandemAxleSep/(aj)) atan(-tandemAxleSep/dualWheelSep) 0 0 0];
     %for the rotation calculations, extend auxAlpha1 and auxAlpha2 to the size of auxSigmaX1 and auxSigmaY2 (z x r)
     auxAlpha1 = ones(length(z),1)*auxAlpha1;
     auxAlpha2 = ones(length(z),1)*auxAlpha2;
@@ -473,13 +479,11 @@ for j = 1:nax
     %get axle Load (tons) -  convert to load by wheel!
     %get load radius - - - - computed with wheelFootprint (called from the MainCode) - - IT'S GIVEN IN CM and accounts for the fact that the axle load is equally divided over all the axle's wheels!
     %get E, nu, height for all materials! - watchful for asphalt        %materials! 
-         %%UPDATE 2019-02-19:: DON'T COMPUTE ANYTHING (AND KEEP ZEROS) IF THERE'S 0 TRAFFIC IN THIS CATEGORY.
-          %%update 2019-03-19:: Correted it to properly work for each load      %%level and axle type
-          %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
+    %%UPDATE 2019-02-19:: DON'T COMPUTE ANYTHING (AND KEEP ZEROS) IF THERE'S 0 TRAFFIC IN THIS CATEGORY.
+    %%update 2019-03-19:: Correted it to properly work for each load      %%level and axle type
+    %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
        if axlesTandem14(k,j)~=0   %"if there's actual traffic of these axles"
            %update V2019-03-31:: pass pressure [qj] instead of total load to MLE_sigma.
-            aj = 0.01*aTandem14(j);
-            qj = 1/6*9800*axlesTandem14Weights(j)/(pi*(aj)^2);
             [auxSigmaZ1,auxSigmaR1,auxSigmaT1] = MLE_sigma(qj,aj,auxR1,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ2,auxSigmaR2,auxSigmaT2] = MLE_sigma(qj,aj,auxR2,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ3,auxSigmaR3,auxSigmaT3] = MLE_sigma(qj,aj,auxR3,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
@@ -549,26 +553,28 @@ layersv = granPoiss * ones(1,nax);
 layersv = [auxv_HMA; layersv];         %repeat to get the Poissons
 
 for j = 1:nax
-    %update v2019-05-20: Rolled back angle convention (was incorrect)
-    %update v2019-03-19: replaced r=0 in auxR1-auxR2 with r=0.01m
+  %update v2019-05-20: Rolled back angle convention (was incorrect)
+  %update v2019-03-19: replaced r=0 in auxR1-auxR2 with r=0.01m
   rTandem18(j,:) = 0:1:11;
-    %since I need to compose the effects of the THREE wheels (and rTandem18 measures from the center of the outermost wheel in the dualwheel axle, I need to define respective r vectors for each.
-    %auxR1 and auxR2 are the radial distance to each wheel from each rSingle10 position [calculated manually elsewhere]
-    auxR1 = [sqrt((0.5*dualWheelSep)^2+(0.5*tandemAxleSep)^2) sqrt((0.5*dualWheelSep)^2+(0.75*tandemAxleSep-0.5*0.01*aTandem18(j))^2) sqrt((0.5*dualWheelSep)^2+(tandemAxleSep-0.01*aTandem18(j))^2) sqrt((0.5*dualWheelSep)^2+tandemAxleSep^2) sqrt((0.5*dualWheelSep)^2+(tandemAxleSep+0.01*aTandem18(j))^2) sqrt((0.5*dualWheelSep)^2+(tandemAxleSep+0.01*aTandem18(j)+0.10)^2)...
-        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(-0.5*0.01*aTandem18(j)+0.75*dualWheelSep)^2) sqrt(tandemAxleSep^2+(dualWheelSep-0.01*aTandem18(j))^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTandem18(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTandem18(j)+0.1)^2)];
-    auxR2 =  [sqrt((0.5*dualWheelSep)^2+(0.5*tandemAxleSep)^2) sqrt((0.5*dualWheelSep)^2+(0.25*tandemAxleSep+0.5*0.01*aTandem18(j))^2) sqrt((0.5*dualWheelSep)^2+(0.01*aTandem18(j))^2) 0.5*dualWheelSep sqrt((0.5*dualWheelSep)^2+(0.01*aTandem18(j))^2) sqrt((0.5*dualWheelSep)^2+(0.01*aTandem18(j)+0.10)^2)...
-        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.5*0.01*aTandem18(j)+0.25*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.01*aTandem18(j))^2) tandemAxleSep sqrt(tandemAxleSep^2+(0.01*aTandem18(j))^2) sqrt(tandemAxleSep^2+(0.01*aTandem18(j)+0.1)^2)];
-    auxR3 = [auxR1(1) auxR1(2) auxR1(3) auxR1(4) auxR1(5) auxR1(6) dualWheelSep/2 0.75*dualWheelSep-0.5*0.01*aTandem18(j) dualWheelSep-0.01*aTandem18(j) dualWheelSep dualWheelSep+0.01*aTandem18(j) dualWheelSep+0.01*aTandem18(j)+0.10];
-    auxR4 = [auxR2(1) auxR2(2) auxR2(3) auxR2(4) auxR2(5) auxR2(6) dualWheelSep/2 0.25*dualWheelSep+0.5*0.01*aTandem18(j) 0.01*aTandem18(j) 0.01 0.01*aTandem18(j) 0.01*aTandem18(j)+0.10];
-    auxAlpha1 = [atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(3*dualWheelSep/2-0.01*aTandem18(j))) atan(tandemAxleSep*0.5/(dualWheelSep-0.01*aTandem18(j))) atan(tandemAxleSep*0.5/dualWheelSep) atan(tandemAxleSep*0.5/(dualWheelSep+0.01*aTandem18(j))) atan(tandemAxleSep*0.5/(dualWheelSep+0.01*aTandem18(j)+0.10))...
-        atan(2*tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(0.75*dualWheelSep-0.5*0.01*aTandem18(j))) atan(tandemAxleSep/(dualWheelSep-0.01*aTandem18(j))) atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(dualWheelSep+0.01*aTandem18(j))) atan(tandemAxleSep/(dualWheelSep+0.01*aTandem18(j)+0.10))];
-    auxAlpha2 = [pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(0.01*aTandem18(j)+0.5*dualWheelSep)) pi-atan(tandemAxleSep*0.5/(0.01*aTandem18(j))) 0.5*pi atan(tandemAxleSep*0.5/(0.01*aTandem18(j))) atan(tandemAxleSep*0.5/(0.10+0.01*aTandem18(j)))...
-        pi-atan(2*tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(0.25*dualWheelSep+0.5*0.01*aTandem18(j))) pi-atan(tandemAxleSep/(0.01*aTandem18(j))) pi/2 atan(tandemAxleSep/(0.01*aTandem18(j))) atan(tandemAxleSep/(0.10+0.01*aTandem18(j)))];
-    auxAlpha3 = [atan(-tandemAxleSep/dualWheelSep) atan(-tandemAxleSep/(3*dualWheelSep/2-0.01*aTandem18(j))) atan(-tandemAxleSep*0.5/(dualWheelSep-0.01*aTandem18(j))) atan(-tandemAxleSep*0.5/dualWheelSep) atan(-tandemAxleSep*0.5/(dualWheelSep+0.01*aTandem18(j))) atan(-tandemAxleSep*0.5/(dualWheelSep+0.01*aTandem18(j)+0.10))...
-        0 0 0 0 0 0 ];
-    auxAlpha4 = [pi+atan(tandemAxleSep/dualWheelSep) pi+atan(tandemAxleSep/(0.01*aTandem18(j)+0.5*dualWheelSep)) pi+atan(tandemAxleSep*0.5/(0.01*aTandem18(j))) -0.5*pi atan(-tandemAxleSep*0.5/(0.01*aTandem18(j))) atan(-tandemAxleSep*0.5/(0.10+0.01*aTandem18(j)))...
+  aj = 0.01*aTandem18(j);
+  qj = 1/8*9800*axlesTandemWeights(j)/(pi*(aj)^2);
+  %since I need to compose the effects of the THREE wheels (and rTandem18 measures from the center of the outermost wheel in the dualwheel axle, I need to define respective r vectors for each.
+  %auxR1 and auxR2 are the radial distance to each wheel from each rSingle10 position [calculated manually elsewhere]
+    auxR1 = [sqrt((0.5*dualWheelSep)^2+(0.5*tandemAxleSep)^2) sqrt((0.5*dualWheelSep)^2+(0.75*tandemAxleSep-0.5*aj)^2) sqrt((0.5*dualWheelSep)^2+(tandemAxleSep-aj)^2) sqrt((0.5*dualWheelSep)^2+tandemAxleSep^2) sqrt((0.5*dualWheelSep)^2+(tandemAxleSep+aj)^2) sqrt((0.5*dualWheelSep)^2+(tandemAxleSep+aj+0.10)^2)...
+        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(-0.5*aj+0.75*dualWheelSep)^2) sqrt(tandemAxleSep^2+(dualWheelSep-aj)^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj+0.1)^2)];
+    auxR2 =  [sqrt((0.5*dualWheelSep)^2+(0.5*tandemAxleSep)^2) sqrt((0.5*dualWheelSep)^2+(0.25*tandemAxleSep+0.5*aj)^2) sqrt((0.5*dualWheelSep)^2+(aj)^2) 0.5*dualWheelSep sqrt((0.5*dualWheelSep)^2+(aj)^2) sqrt((0.5*dualWheelSep)^2+(aj+0.10)^2)...
+        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.5*aj+0.25*dualWheelSep)^2) sqrt(tandemAxleSep^2+(aj)^2) tandemAxleSep sqrt(tandemAxleSep^2+(aj)^2) sqrt(tandemAxleSep^2+(aj+0.1)^2)];
+    auxR3 = [auxR1(1) auxR1(2) auxR1(3) auxR1(4) auxR1(5) auxR1(6) dualWheelSep/2 0.75*dualWheelSep-0.5*aj dualWheelSep-aj dualWheelSep dualWheelSep+aj dualWheelSep+aj+0.10];
+    auxR4 = [auxR2(1) auxR2(2) auxR2(3) auxR2(4) auxR2(5) auxR2(6) dualWheelSep/2 0.25*dualWheelSep+0.5*aj aj 0.01 aj aj+0.10];
+    auxAlpha1 = [atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(3*dualWheelSep/2-aj)) atan(tandemAxleSep*0.5/(dualWheelSep-aj)) atan(tandemAxleSep*0.5/dualWheelSep) atan(tandemAxleSep*0.5/(dualWheelSep+aj)) atan(tandemAxleSep*0.5/(dualWheelSep+aj+0.10))...
+        atan(2*tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(0.75*dualWheelSep-0.5*aj)) atan(tandemAxleSep/(dualWheelSep-aj)) atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(dualWheelSep+aj)) atan(tandemAxleSep/(dualWheelSep+aj+0.10))];
+    auxAlpha2 = [pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(aj+0.5*dualWheelSep)) pi-atan(tandemAxleSep*0.5/(aj)) 0.5*pi atan(tandemAxleSep*0.5/(aj)) atan(tandemAxleSep*0.5/(0.10+aj))...
+        pi-atan(2*tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(0.25*dualWheelSep+0.5*aj)) pi-atan(tandemAxleSep/(aj)) pi/2 atan(tandemAxleSep/(aj)) atan(tandemAxleSep/(0.10+aj))];
+    auxAlpha3 = [atan(-tandemAxleSep/dualWheelSep) atan(-tandemAxleSep/(3*dualWheelSep/2-aj)) atan(-tandemAxleSep*0.5/(dualWheelSep-aj)) atan(-tandemAxleSep*0.5/dualWheelSep) atan(-tandemAxleSep*0.5/(dualWheelSep+aj)) atan(-tandemAxleSep*0.5/(dualWheelSep+aj+0.10))...
+        0 0 0 0 0 0];
+    auxAlpha4 = [pi+atan(tandemAxleSep/dualWheelSep) pi+atan(tandemAxleSep/(aj+0.5*dualWheelSep)) pi+atan(tandemAxleSep*0.5/(aj)) -0.5*pi atan(-tandemAxleSep*0.5/(aj)) atan(-tandemAxleSep*0.5/(0.10+aj))...
         pi pi pi 0 0 0];
-    %for the rotation calculations, extend auxAlpha1 and auxAlpha2 to the size of auxSigmaX1 and auxSigmaY2 (z x r)
+  %for the rotation calculations, extend auxAlpha1 and auxAlpha2 to the size of auxSigmaX1 and auxSigmaY2 (z x r)
     auxAlpha1 = ones(length(z),1)*auxAlpha1;
     auxAlpha2 = ones(length(z),1)*auxAlpha2;
     auxAlpha3 = ones(length(z),1)*auxAlpha3;
@@ -576,13 +582,11 @@ for j = 1:nax
     %get axle Load (tons) -  convert to load by wheel!
     %get load radius - - - - computed with wheelFootprint (called from the MainCode) - - IT'S GIVEN IN CM and accounts for the fact that the axle load is equally divided over all the axle's wheels!
     %get E, nu, height for all materials! - watchful for asphalt        %materials! 
-       %%UPDATE 2019-02-19:: DON'T COMPUTE ANYTHING (AND KEEP ZEROS) IF THERE'S 0 TRAFFIC IN THIS CATEGORY.
-        %%update 2019-03-19:: Correted it to properly work for each load      %%level and axle type
-        %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
+    %%UPDATE 2019-02-19:: DON'T COMPUTE ANYTHING (AND KEEP ZEROS) IF THERE'S 0 TRAFFIC IN THIS CATEGORY.
+    %%update 2019-03-19:: Correted it to properly work for each load      %%level and axle type
+    %%UPDATE 2019-03-19:: CONVERT LOAD TO NEWTON ( ton x 9800), DISTANCES TO METERS (cm x 0.01), AND E TO PA (psi x 1.000.000 / 145.04)
        if axlesTandem18(k,j)~=0   %"if there's actual traffic of these axles"
            %update V2019-03-31:: pass pressure [qj] instead of total load to MLE_sigma.
-            aj = 0.01*aTandem18(j);
-            qj = 1/8*9800*axlesTandemWeights(j)/(pi*(aj)^2);
             [auxSigmaZ1,auxSigmaR1,auxSigmaT1] = MLE_sigma(qj,aj,auxR1,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ2,auxSigmaR2,auxSigmaT2] = MLE_sigma(qj,aj,auxR2,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ3,auxSigmaR3,auxSigmaT3] = MLE_sigma(qj,aj,auxR3,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
@@ -659,43 +663,45 @@ layersv = [auxv_HMA; layersv];         %repeat to get the Poissons
 
 for j = 1:nax
     rTridem(j,:) = 0:1:17;
+    aj = 0.01*aTridem(j);
+    qj = 1/12*9800*axlesTridemWeights(j)/(pi*(aj)^2);         
     %since I need to compose the effects of the THREE wheels (and rTridem measures from the center of the outermost wheel in the dualwheel axle, I need to define respective r vectors for each.
     %auxR1 and auxR2 are the radial distance to each wheel from each rSingle10 position [calculated manually elsewhere]
-    auxR1 = [sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.75*dualWheelSep-0.5*0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep-0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTridem(j)+0.10)^2)...
-        sqrt((1.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((1.5*tandemAxleSep)^2+(0.75*dualWheelSep-0.5*0.01*aTridem(j))^2) sqrt((1.5*tandemAxleSep)^2+(dualWheelSep-0.01*aTridem(j))^2) sqrt((1.5*tandemAxleSep)^2+dualWheelSep^2) sqrt((1.5*tandemAxleSep)^2+(dualWheelSep+0.01*aTridem(j))^2) sqrt((1.5*tandemAxleSep)^2+(dualWheelSep+0.01*aTridem(j)+0.10)^2)...
-        sqrt((2*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((2*tandemAxleSep)^2+(0.75*dualWheelSep-0.5*0.01*aTridem(j))^2) sqrt((2*tandemAxleSep)^2+(dualWheelSep-0.01*aTridem(j))^2) sqrt((2*tandemAxleSep)^2+dualWheelSep^2) sqrt((2*tandemAxleSep)^2+(dualWheelSep+0.01*aTridem(j))^2) sqrt((2*tandemAxleSep)^2+(dualWheelSep+0.01*aTridem(j)+0.10)^2)];
-    auxR2 = [sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.25*dualWheelSep+0.5*0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(0.01*aTridem(j))^2) tandemAxleSep sqrt(tandemAxleSep^2+(0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(0.01*aTridem(j)+0.10)^2)...
-        sqrt((1.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((1.5*tandemAxleSep)^2+(0.25*dualWheelSep+0.5*0.01*aTridem(j))^2) sqrt((1.5*tandemAxleSep)^2+(0.01*aTridem(j))^2) 1.5*tandemAxleSep sqrt((1.5*tandemAxleSep)^2+(0.01*aTridem(j))^2) sqrt((1.5*tandemAxleSep)^2+(0.01*aTridem(j)+0.10)^2)...
-        sqrt((2*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((2*tandemAxleSep)^2+(0.25*dualWheelSep+0.5*0.01*aTridem(j))^2) sqrt((2*tandemAxleSep)^2+(0.01*aTridem(j))^2) 2*tandemAxleSep sqrt((2*tandemAxleSep)^2+(0.01*aTridem(j))^2) sqrt((2*tandemAxleSep)^2+(0.01*aTridem(j)+0.10)^2)];
-    auxR3 = [0.5*dualWheelSep 0.75*dualWheelSep-0.5*0.01*aTridem(j) dualWheelSep-0.01*aTridem(j) dualWheelSep dualWheelSep+0.01*aTridem(j) dualWheelSep+0.01*aTridem(j)+0.10...
-        sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((0.5*tandemAxleSep)^2+(0.75*dualWheelSep-0.5*0.01*aTridem(j))^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep-0.01*aTridem(j))^2) sqrt((0.5*tandemAxleSep)^2+dualWheelSep^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep+0.01*aTridem(j))^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep+0.01*aTridem(j)+0.10)^2)...
-        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.75*dualWheelSep-0.5*0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep-0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(dualWheelSep+0.01*aTridem(j)+0.10)^2)];
-    auxR4 = [0.5*dualWheelSep 0.25*dualWheelSep+0.5*0.01*aTridem(j) 0.01*aTridem(j) 0.01 0.01*aTridem(j) 0.01*aTridem(j)+0.10...
-        sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((0.5*tandemAxleSep)^2+(0.25*dualWheelSep+0.5*0.01*aTridem(j))^2) sqrt((0.5*tandemAxleSep)^2+(0.01*aTridem(j))^2) 1.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(0.01*aTridem(j))^2) sqrt((0.5*tandemAxleSep)^2+(0.01*aTridem(j)+0.10)^2)...
-        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.25*dualWheelSep+0.5*0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(0.01*aTridem(j))^2) tandemAxleSep sqrt(tandemAxleSep^2+(0.01*aTridem(j))^2) sqrt(tandemAxleSep^2+(0.01*aTridem(j)+0.10)^2)];
+    auxR1 = [sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.75*dualWheelSep-0.5*aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep-aj)^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj+0.10)^2)...
+        sqrt((1.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((1.5*tandemAxleSep)^2+(0.75*dualWheelSep-0.5*aj)^2) sqrt((1.5*tandemAxleSep)^2+(dualWheelSep-aj)^2) sqrt((1.5*tandemAxleSep)^2+dualWheelSep^2) sqrt((1.5*tandemAxleSep)^2+(dualWheelSep+aj)^2) sqrt((1.5*tandemAxleSep)^2+(dualWheelSep+aj+0.10)^2)...
+        sqrt((2*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((2*tandemAxleSep)^2+(0.75*dualWheelSep-0.5*aj)^2) sqrt((2*tandemAxleSep)^2+(dualWheelSep-aj)^2) sqrt((2*tandemAxleSep)^2+dualWheelSep^2) sqrt((2*tandemAxleSep)^2+(dualWheelSep+aj)^2) sqrt((2*tandemAxleSep)^2+(dualWheelSep+aj+0.10)^2)];
+    auxR2 = [sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.25*dualWheelSep+0.5*aj)^2) sqrt(tandemAxleSep^2+(aj)^2) tandemAxleSep sqrt(tandemAxleSep^2+(aj)^2) sqrt(tandemAxleSep^2+(aj+0.10)^2)...
+        sqrt((1.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((1.5*tandemAxleSep)^2+(0.25*dualWheelSep+0.5*aj)^2) sqrt((1.5*tandemAxleSep)^2+(aj)^2) 1.5*tandemAxleSep sqrt((1.5*tandemAxleSep)^2+(aj)^2) sqrt((1.5*tandemAxleSep)^2+(aj+0.10)^2)...
+        sqrt((2*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((2*tandemAxleSep)^2+(0.25*dualWheelSep+0.5*aj)^2) sqrt((2*tandemAxleSep)^2+(aj)^2) 2*tandemAxleSep sqrt((2*tandemAxleSep)^2+(aj)^2) sqrt((2*tandemAxleSep)^2+(aj+0.10)^2)];
+    auxR3 = [0.5*dualWheelSep 0.75*dualWheelSep-0.5*aj dualWheelSep-aj dualWheelSep dualWheelSep+aj dualWheelSep+aj+0.10...
+        sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((0.5*tandemAxleSep)^2+(0.75*dualWheelSep-0.5*aj)^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep-aj)^2) sqrt((0.5*tandemAxleSep)^2+dualWheelSep^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep+aj)^2) sqrt((0.5*tandemAxleSep)^2+(dualWheelSep+aj+0.10)^2)...
+        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.75*dualWheelSep-0.5*aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep-aj)^2) sqrt(tandemAxleSep^2+dualWheelSep^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj)^2) sqrt(tandemAxleSep^2+(dualWheelSep+aj+0.10)^2)];
+    auxR4 = [0.5*dualWheelSep 0.25*dualWheelSep+0.5*aj aj 0.01 aj aj+0.10...
+        sqrt((0.5*tandemAxleSep)^2+(0.5*dualWheelSep)^2) sqrt((0.5*tandemAxleSep)^2+(0.25*dualWheelSep+0.5*aj)^2) sqrt((0.5*tandemAxleSep)^2+(aj)^2) 1.5*tandemAxleSep sqrt((0.5*tandemAxleSep)^2+(aj)^2) sqrt((0.5*tandemAxleSep)^2+(aj+0.10)^2)...
+        sqrt(tandemAxleSep^2+(0.5*dualWheelSep)^2) sqrt(tandemAxleSep^2+(0.25*dualWheelSep+0.5*aj)^2) sqrt(tandemAxleSep^2+(aj)^2) tandemAxleSep sqrt(tandemAxleSep^2+(aj)^2) sqrt(tandemAxleSep^2+(aj+0.10)^2)];
     auxR5 = [auxR1(1) auxR1(2) auxR1(3) auxR1(4) auxR1(5) auxR1(6)...
         auxR3(7) auxR3(8) auxR3(9) auxR3(10) auxR3(11) auxR3(12)...
-        0.5*dualWheelSep 0.75*dualWheelSep-0.5*0.01*aTridem(j) dualWheelSep-0.01*aTridem(j) dualWheelSep dualWheelSep+0.01*aTridem(j) dualWheelSep+0.01*aTridem(j)+0.10];
+        0.5*dualWheelSep 0.75*dualWheelSep-0.5*aj dualWheelSep-aj dualWheelSep dualWheelSep+aj dualWheelSep+aj+0.10];
     auxR6 = [auxR2(1) auxR2(2) auxR2(3) auxR2(4) auxR2(5) auxR2(6)...
         auxR4(7) auxR4(8) auxR4(9) auxR4(10) auxR4(11) auxR4(12)...
-        0.5*dualWheelSep 0.25*dualWheelSep+0.5*0.01*aTridem(j) 0.01*aTridem(j) 0.01 0.01*aTridem(j) 0.01*aTridem(j)+0.10];
-    auxAlpha1 = [atan(2*tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(0.75*dualWheelSep-0.5*0.01*aTridem(j))) atan(tandemAxleSep/(dualWheelSep-0.01*aTridem(j))) atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(dualWheelSep+0.01*aTridem(j))) atan(tandemAxleSep/(dualWheelSep+0.01*aTridem(j)+0.10))...
-        atan(3*tandemAxleSep/dualWheelSep) atan(1.5*tandemAxleSep/(0.75*dualWheelSep-0.5*0.01*aTridem(j))) atan(1.5*tandemAxleSep/(dualWheelSep-0.01*aTridem(j))) atan(1.5*tandemAxleSep/dualWheelSep) atan(1.5*tandemAxleSep/(dualWheelSep+0.01*aTridem(j))) atan(1.5*tandemAxleSep/(dualWheelSep+0.01*aTridem(j)+0.10))...
-        atan(4*tandemAxleSep/dualWheelSep) atan(2*tandemAxleSep/(0.75*dualWheelSep-0.5*0.01*aTridem(j))) atan(2*tandemAxleSep/(dualWheelSep-0.01*aTridem(j))) atan(2*tandemAxleSep/dualWheelSep) atan(2*tandemAxleSep/(dualWheelSep+0.01*aTridem(j))) atan(2*tandemAxleSep/(dualWheelSep+0.01*aTridem(j)+0.10))];
-    auxAlpha2 = [pi-atan(2*tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(0.25*dualWheelSep+0.5*0.01*aTridem(j))) pi-atan(tandemAxleSep/(0.01*aTridem(j))) 0.5*pi atan(tandemAxleSep/(0.01*aTridem(j))) atan(tandemAxleSep/(0.01*aTridem(j)+0.10))...
-        pi-atan(3*tandemAxleSep/dualWheelSep) pi-atan(1.5*tandemAxleSep/(0.25*dualWheelSep+0.5*0.01*aTridem(j))) pi-atan(1.5*tandemAxleSep/(0.01*aTridem(j))) 0.5*pi atan(1.5*tandemAxleSep/(0.01*aTridem(j))) atan(1.5*tandemAxleSep/(0.01*aTridem(j)+0.10))...
-        pi-atan(4*tandemAxleSep/dualWheelSep) pi-atan(2*tandemAxleSep/(0.25*dualWheelSep+0.5*0.01*aTridem(j))) pi-atan(2*tandemAxleSep/(0.01*aTridem(j))) 0.5*pi atan(2*tandemAxleSep/(0.01*aTridem(j))) atan(2*tandemAxleSep/(0.01*aTridem(j)+0.10))];
+        0.5*dualWheelSep 0.25*dualWheelSep+0.5*aj aj 0.01 aj aj+0.10];
+    auxAlpha1 = [atan(2*tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(0.75*dualWheelSep-0.5*aj)) atan(tandemAxleSep/(dualWheelSep-aj)) atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(dualWheelSep+aj)) atan(tandemAxleSep/(dualWheelSep+aj+0.10))...
+        atan(3*tandemAxleSep/dualWheelSep) atan(1.5*tandemAxleSep/(0.75*dualWheelSep-0.5*aj)) atan(1.5*tandemAxleSep/(dualWheelSep-aj)) atan(1.5*tandemAxleSep/dualWheelSep) atan(1.5*tandemAxleSep/(dualWheelSep+aj)) atan(1.5*tandemAxleSep/(dualWheelSep+aj+0.10))...
+        atan(4*tandemAxleSep/dualWheelSep) atan(2*tandemAxleSep/(0.75*dualWheelSep-0.5*aj)) atan(2*tandemAxleSep/(dualWheelSep-aj)) atan(2*tandemAxleSep/dualWheelSep) atan(2*tandemAxleSep/(dualWheelSep+aj)) atan(2*tandemAxleSep/(dualWheelSep+aj+0.10))];
+    auxAlpha2 = [pi-atan(2*tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(0.25*dualWheelSep+0.5*aj)) pi-atan(tandemAxleSep/(aj)) 0.5*pi atan(tandemAxleSep/(aj)) atan(tandemAxleSep/(aj+0.10))...
+        pi-atan(3*tandemAxleSep/dualWheelSep) pi-atan(1.5*tandemAxleSep/(0.25*dualWheelSep+0.5*aj)) pi-atan(1.5*tandemAxleSep/(aj)) 0.5*pi atan(1.5*tandemAxleSep/(aj)) atan(1.5*tandemAxleSep/(aj+0.10))...
+        pi-atan(4*tandemAxleSep/dualWheelSep) pi-atan(2*tandemAxleSep/(0.25*dualWheelSep+0.5*aj)) pi-atan(2*tandemAxleSep/(aj)) 0.5*pi atan(2*tandemAxleSep/(aj)) atan(2*tandemAxleSep/(aj+0.10))];
     auxAlpha3 = [0 0 0 0 0 0 ...
-        atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep*0.5/(0.75*dualWheelSep-0.5*0.01*aTridem(j))) atan(tandemAxleSep*0.5/(dualWheelSep-0.01*aTridem(j))) atan(tandemAxleSep*0.5/dualWheelSep) atan(tandemAxleSep*0.5/(dualWheelSep+0.01*aTridem(j))) atan(tandemAxleSep*0.5/(dualWheelSep+0.01*aTridem(j)+0.10))...
-        atan(2*tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(0.75*dualWheelSep-0.5*0.01*aTridem(j))) atan(tandemAxleSep/(dualWheelSep-0.01*aTridem(j))) atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(dualWheelSep+0.01*aTridem(j))) atan(tandemAxleSep/(dualWheelSep+0.01*aTridem(j)+0.10))];
+        atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep*0.5/(0.75*dualWheelSep-0.5*aj)) atan(tandemAxleSep*0.5/(dualWheelSep-aj)) atan(tandemAxleSep*0.5/dualWheelSep) atan(tandemAxleSep*0.5/(dualWheelSep+aj)) atan(tandemAxleSep*0.5/(dualWheelSep+aj+0.10))...
+        atan(2*tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(0.75*dualWheelSep-0.5*aj)) atan(tandemAxleSep/(dualWheelSep-aj)) atan(tandemAxleSep/dualWheelSep) atan(tandemAxleSep/(dualWheelSep+aj)) atan(tandemAxleSep/(dualWheelSep+aj+0.10))];
     auxAlpha4 = [pi pi pi 0 0 0 ...
-        pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep*0.5/(0.25*dualWheelSep+0.5*0.01*aTridem(j))) pi-atan(tandemAxleSep*0.5/(0.01*aTridem(j))) 0.5*pi atan(tandemAxleSep*0.5/(0.01*aTridem(j))) atan(tandemAxleSep*0.5/(aTridem(j)*0.01+0.10))...
-        pi-atan(2*tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(0.25*dualWheelSep+0.5*0.01*aTridem(j))) pi-atan(tandemAxleSep/(0.01*aTridem(j))) 0.5*pi atan(tandemAxleSep/(0.01*aTridem(j))) atan(tandemAxleSep/(aTridem(j)*0.01+0.10))];
-    auxAlpha5 = [atan(-2*tandemAxleSep/dualWheelSep) atan(-tandemAxleSep/(0.75*dualWheelSep-0.5*0.01*aTridem(j))) atan(-tandemAxleSep/(dualWheelSep-0.01*aTridem(j))) atan(-tandemAxleSep/dualWheelSep) atan(-tandemAxleSep/(dualWheelSep+0.01*aTridem(j))) atan(-tandemAxleSep/(dualWheelSep+0.01*aTridem(j)+0.10))...    
-        atan(-tandemAxleSep/dualWheelSep) atan(-tandemAxleSep*0.5/(0.75*dualWheelSep-0.5*0.01*aTridem(j))) atan(-tandemAxleSep*0.5/(dualWheelSep-0.01*aTridem(j))) atan(-tandemAxleSep*0.5/dualWheelSep) atan(-tandemAxleSep*0.5/(dualWheelSep+0.01*aTridem(j))) atan(-tandemAxleSep*0.5/(dualWheelSep+0.01*aTridem(j)+0.10))...
+        pi-atan(tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep*0.5/(0.25*dualWheelSep+0.5*aj)) pi-atan(tandemAxleSep*0.5/(aj)) 0.5*pi atan(tandemAxleSep*0.5/(aj)) atan(tandemAxleSep*0.5/(aTridem(j)*0.01+0.10))...
+        pi-atan(2*tandemAxleSep/dualWheelSep) pi-atan(tandemAxleSep/(0.25*dualWheelSep+0.5*aj)) pi-atan(tandemAxleSep/(aj)) 0.5*pi atan(tandemAxleSep/(aj)) atan(tandemAxleSep/(aTridem(j)*0.01+0.10))];
+    auxAlpha5 = [atan(-2*tandemAxleSep/dualWheelSep) atan(-tandemAxleSep/(0.75*dualWheelSep-0.5*aj)) atan(-tandemAxleSep/(dualWheelSep-aj)) atan(-tandemAxleSep/dualWheelSep) atan(-tandemAxleSep/(dualWheelSep+aj)) atan(-tandemAxleSep/(dualWheelSep+aj+0.10))...    
+        atan(-tandemAxleSep/dualWheelSep) atan(-tandemAxleSep*0.5/(0.75*dualWheelSep-0.5*aj)) atan(-tandemAxleSep*0.5/(dualWheelSep-aj)) atan(-tandemAxleSep*0.5/dualWheelSep) atan(-tandemAxleSep*0.5/(dualWheelSep+aj)) atan(-tandemAxleSep*0.5/(dualWheelSep+aj+0.10))...
         0 0 0 0 0 0];
-    auxAlpha6 = [pi+atan(2*tandemAxleSep/dualWheelSep) pi+atan(tandemAxleSep/(0.25*dualWheelSep+0.5*0.01*aTridem(j))) pi+atan(tandemAxleSep/(0.01*aTridem(j))) -0.5*pi atan(-tandemAxleSep/(0.01*aTridem(j))) atan(-tandemAxleSep/(0.01*aTridem(j)+0.10))...
-        pi+atan(tandemAxleSep/dualWheelSep) pi+atan(tandemAxleSep*0.5/(0.25*dualWheelSep+0.5*0.01*aTridem(j))) pi+atan(tandemAxleSep*0.5/(0.01*aTridem(j))) -0.5*pi atan(-tandemAxleSep*0.5/(0.01*aTridem(j))) atan(-tandemAxleSep*0.5/(aTridem(j)*0.01+0.10))...
+    auxAlpha6 = [pi+atan(2*tandemAxleSep/dualWheelSep) pi+atan(tandemAxleSep/(0.25*dualWheelSep+0.5*aj)) pi+atan(tandemAxleSep/(aj)) -0.5*pi atan(-tandemAxleSep/(aj)) atan(-tandemAxleSep/(aj+0.10))...
+        pi+atan(tandemAxleSep/dualWheelSep) pi+atan(tandemAxleSep*0.5/(0.25*dualWheelSep+0.5*aj)) pi+atan(tandemAxleSep*0.5/(aj)) -0.5*pi atan(-tandemAxleSep*0.5/(aj)) atan(-tandemAxleSep*0.5/(aTridem(j)*0.01+0.10))...
         pi pi pi 0 0 0];
    %for the rotation calculations, extend auxAlpha1 and auxAlpha2 to the size of auxSigmaX1 and auxSigmaY2 (z x r)
     auxAlpha1 = ones(length(z),1)*auxAlpha1;
@@ -713,8 +719,6 @@ for j = 1:nax
       %%%BUG DETECTED HERE!. Calling AxlesTandem18 instead of axlesTridem!
       if axlesTridem(k,j)~=0   %"if there's actual traffic of these axles"
             %update V2019-03-31:: pass pressure [qj] instead of total load to MLE_sigma.
-            aj = 0.01*aTridem(j);
-            qj = 1/12*9800*axlesTridemWeights(j)/(pi*(aj)^2);
             [auxSigmaZ1,auxSigmaR1,auxSigmaT1] = MLE_sigma(qj,aj,auxR1,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ2,auxSigmaR2,auxSigmaT2] = MLE_sigma(qj,aj,auxR2,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
             [auxSigmaZ3,auxSigmaR3,auxSigmaT3] = MLE_sigma(qj,aj,auxR3,z,0.01*paveDepths(1:end-1),layersE(:,j),layersv(:,j));
