@@ -1,22 +1,32 @@
-%%integrity check script to run upon start of the Product-1 MainCode
+%%integrity check script to run upon start of the Product-One MainCode
+%
+%%update V2019-07-18: Added check for the datetime function in GNU-Octave (non-native). 
+%%Also, added instructions on how to retrieve it.
 
 %% - 1 check if I have the I/O functions -octave only- and install if needed
 isThisOctave = exist('OCTAVE_VERSION') ~=0; 
 if isThisOctave
    disp('PRODUCT-ONE DETECTED YOU ARE RUNNING GNU-OCTAVE')
+   warning("off","Octave:divide-by-zero")   %disable these warnings cause Octave would otherwise throw hundreds of them when solving the MLE
    more on         %%update 2019-02-11. See if this line forces Octave to print the verbose output to screen in real-time...
    checkforIOPkg = exist('xlsread')==0;    %%if this hold true (the IO package has not yet been installed/loaded), download and install pkg io
    if checkforIOPkg
-       pkg load io   %%try this sentence in octave, see what's the outcome when io is not installed (and will need to download)
+      warning('Please install IO package for Octave and restart') 
+      disp('retrieve it directly from Octave-Forge')
+      pkg load io   %%try this sentence in octave, see what's the outcome when io is not installed (and will need to download)
        %Nevertheless, Octave version will use odsread instead for importing files.
    end 
+   checkforDateTimePkg = exist('datetime')==0;
+   if checkforDateTimePkg
+       warning('Please install chrono package for Octave and restart') 
+       disp('retrieve it from : https://github.com/apjanke/octave-chrono/releases/download/v0.3.1/chrono-0.3.1.tar.gz')
+      pkg load chrono %% The tarball that the uploader provided has some syntax error and wouldn't install with the pkg install command.
+      % However, I managed to install and load a version with a small tweak. I added it to the repository. Credit to A. Janke for the "chrono" pkg.
+   end
+   
 else
      disp('PRODUCT-ONE DETECTED YOU ARE RUNNING MATLAB')
 end
-
-%% - 2 check if all the files to run are AVAILABLE
-%%% in addpath
-
 
 %% - 3 addpaths
 addpath './plottingTools';  %path to codes for plotting
