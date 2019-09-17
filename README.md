@@ -16,7 +16,7 @@ creativecommons.org/licenses/by-sa/4.0/
 
 * Product-One M-E has been written in Matlab language. You may need a Matlab interpreter (either Matlab(R) or GNU-Octave) to run the software. 
 * The "MAIN_CODE.m" file is Product-One's front-end script. You must run that script from the interpreter's command window to execute Product-One. 
-* All the input data to the design process must be loaded onto the input data spreadsheet before running the MAIN_CODE. A templateof the input data spreadsheet is "dataInput.xlsx".
+* All the input data to the design process must be loaded onto the input data spreadsheet before running the MAIN_CODE. A template of the input data spreadsheet is "dataInput.xlsx".
 You may want to have different spreadsheets with inputs for different projects, so you may save each under a different filename.
 Upon execution, Product-One will ask you the name of the input data spreadsheet, go the interpreter's main command window and write accordingly.
 * Refer to Scavone (2019) [full citation above] for further insight on the contents of Product-One.
