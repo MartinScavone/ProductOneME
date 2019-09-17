@@ -1,5 +1,7 @@
 %%integrity check script to run upon start of the Product-One MainCode
-%
+%%
+%%
+%%update V2019-09-17: Forced a 'more off' in Ocvtave so that all the on-screen messages would appear as the code runs 
 %%update V2019-07-18: Added check for the datetime function in GNU-Octave (non-native). 
 %%Also, added instructions on how to retrieve it.
 
@@ -8,7 +10,7 @@ isThisOctave = exist('OCTAVE_VERSION') ~=0;
 if isThisOctave
    disp('PRODUCT-ONE DETECTED YOU ARE RUNNING GNU-OCTAVE')
    warning("off","Octave:divide-by-zero")   %disable these warnings cause Octave would otherwise throw hundreds of them when solving the MLE
-   more on         %%update 2019-02-11. See if this line forces Octave to print the verbose output to screen in real-time...
+   more of         %%update 2019-09-17. See if this line forces Octave to print the verbose output to screen in real-time...
    checkforIOPkg = exist('xlsread')==0;    %%if this hold true (the IO package has not yet been installed/loaded), download and install pkg io
    if checkforIOPkg
       warning('Please install IO package for Octave and restart') 
