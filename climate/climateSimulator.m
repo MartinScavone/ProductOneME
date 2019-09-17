@@ -1,5 +1,5 @@
-function climateMatrix = climateSimulator(projectX,projectY,verbose,forceRecalcMatrix)
-%function climateMatrix = climateSimulator(ProjectX,ProjectY,verbose,forceRecalcMatrix)
+function climateMatrix = climateSimulator(projectX,projectY,verbose,forceRecalcMatrix,isThisOctave)
+%function climateMatrix = climateSimulator(ProjectX,ProjectY,verbose,forceRecalcMatrix,isThisOctave)
 %
 %%front-end function to develop the project site's simulated climate variables
 %this function will work as follows
@@ -9,7 +9,11 @@ function climateMatrix = climateSimulator(projectX,projectY,verbose,forceRecalcM
 %The "verbose" input allows to show on screen every calculation step. input 1 if you want to do so. If no input, it assumes zero
 %NEW: The forceRecalcMatrix forces the code to generate a new site's climate record from INIA DB regardless of the cached record being still useful.
 %
-%Updated Matching V2018-09-05:  Separate lvl2 climate interpolator from scrambler.
+%V2019-09-16: Added isThisOctave boolean function for the climateSimulator
+%to retrieve an Octave or Matlab MAT format cache of climate data and the INIA data!
+%(Matlab and Octave MAT files are different, only the latter case is human-readable!!)
+%
+%V2018-09-05:  Separate lvl2 climate interpolator from scrambler.
 %                               New output will be the interpolated only if
 %                               a previously executed cached climateMatrix
 %                               won't serve (it has been solved for a
@@ -19,10 +23,15 @@ function climateMatrix = climateSimulator(projectX,projectY,verbose,forceRecalcM
 
 %% Preprocc. check if last-generated cached climate records matrix still works (we are in the same projectX and projectY, and the cached record is the same length!)
 %(if that's the case, spare us interpolating a new climate record)
-% note - if forceRecalcMatrix == 1 , ignore matrix recycling, and
-% recalculate all the same!
+% note - if forceRecalcMatrix == 1 , ignore matrix recycling, and  recalculate all the same!
 
-load 'climateMatrixCached.mat'
+if isThisOctave
+    %load a cache from octave!
+    load 'climateMatrixCachedOCT.mat'
+else
+    %load a cache from Matlab
+    load 'climateMatrixCachedMAT.mat'
+end
 %the mat file loaded here contains:
 %   oldX, oldY = X,Y position of the last project site
 %   oldClimateMatrix = cached climate record from previous execution
@@ -44,10 +53,14 @@ else
     %% Part1 - Bring the INIA weather records    
     if verbose == 1
         disp('climateSimulator:: loading INIA Weather stations climate database')
-    end    
-    load './dataFiles/INIAClimate.mat'
+    end
     %this .mat file contains structures with the hourly weather data from 8 INIA stations
     %INIA_LE INIA_LB INIA_33 INIA_Tbo INIA_Dur INIA_Gle INIA_SG INIA_RO
+    if isThisOctave
+        load './dataFiles/INIAClimateOctave.mat'
+    else
+        load './dataFiles/INIAClimateMATLAB.mat'
+    end    
     
     %% Part 2 - Create virtual station with distance square interpolation technique.  (Wei & McGuinness 1973)
     %Extract the interpolation factors
@@ -402,11 +415,16 @@ else
     end
     %%export as output...
     climateMatrix = [timestamp temp hum wspd rain srad];
+    %update 2019-09-16 - Store separately for the case calculated in Matlab or GNU-Octave.
     %UPDATE 2018-09-05 - Store the newly generated climateMatrix in Cache
     oldY = projectY;
     oldX = projectX;
     oldClimateMatrix = climateMatrix;
-    save './dataFiles/climateMAtrixCached.mat' oldX oldY oldClimateMatrix
+    if isThisOctave
+        save './dataFiles/climateMAtrixCachedOCT.mat' oldX oldY oldClimateMatrix        
+    else
+        save './dataFiles/climateMAtrixCachedMAT.mat' oldX oldY oldClimateMatrix
+    end
     
 end %close the if loop in ln30
 
