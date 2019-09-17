@@ -12,6 +12,8 @@
 
 clear variables
 clc
+more off
+
 
 disp('starting up First-time climate data importer')
 %%Create structures
@@ -51,7 +53,9 @@ INIA_RO(1).Location = [737562.7296 6169126.4819 19];   %Rocha
 %%INIA LE
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA Estanzuela')
-INIAData = odsread('../clima/INIA_LE.ods',1,'a5:j73484'); 
+drawnow
+%INIAData = odsread('INIA_LE.ods',1,'a5:j73484'); 
+INIAData = csvread('INIA_LE.csv'); 
 INIA_LE(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0);
 INIA_LE(1).temp = INIAData(:,5);
 INIA_LE(1).hum = INIAData(:,6);
@@ -62,7 +66,9 @@ INIA_LE(1).srad = INIAData(:,10);
 %%INIA LB
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA Las Brujas')
-INIAData = odsread('../clima/INIA_LB.ods',1,'a5:j71256');
+drawnow
+%INIAData = odsread('INIA_LB.ods',1,'a5:j71256');
+INIAData = csvread('INIA_LB.csv');
 INIA_LB(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0);
 INIA_LB(1).temp = INIAData(:,5);
 INIA_LB(1).hum = INIAData(:,6);
@@ -73,7 +79,9 @@ INIA_LB(1).srad = INIAData(:,10);
 %INIA_33
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA TrrrreintayTrrres')
-INIAData = odsread('../clima/INIA_33.ods',1,'a5:j64381');
+drawnow
+%INIAData = odsread('INIA_33.ods',1,'a5:j64381');
+INIAData = csvread('INIA_33.csv');
 INIA_33(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0) ;
 INIA_33(1).temp = INIAData(:,5);
 INIA_33(1).hum = INIAData(:,6);
@@ -84,7 +92,9 @@ INIA_33(1).srad = INIAData(:,10);
 %INIA_tbo
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA Tacuarembo')
-INIAData = odsread('../clima/INIA_Tbo.ods',1,'a5:j73065');
+drawnow
+%INIAData = odsread('INIA_Tbo.ods',1,'a5:j73065');
+INIAData = csvread('INIA_Tbo.csv');
 INIA_Tbo(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0) ;
 INIA_Tbo(1).temp = INIAData(:,5);
 INIA_Tbo(1).hum = INIAData(:,6);
@@ -95,7 +105,10 @@ INIA_Tbo(1).srad = INIAData(:,10);
 %INIA_Gle
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA Glencoe')
-INIAData = odsread('../clima/INIA_Gle.ods',1,'a5:j68990');
+drawnow
+%INIAData = odsread('INIA_Gle.ods',1,'a5:j68990');
+INIAData = csvread('INIA_Gle.csv');
+
 INIA_Gle(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0);
 INIA_Gle(1).temp = INIAData(:,5);
 INIA_Gle(1).hum = INIAData(:,6);
@@ -106,7 +119,10 @@ INIA_Gle(1).srad = INIAData(:,10);
 %Inia durazno
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA Durazno')
-INIAData = odsread('../clima/INIA_Dur.ods',1,'a5:j38165');
+drawnow
+%INIAData = odsread('INIA_Dur.ods',1,'a5:j38165');
+INIAData = csvread('INIA_Dur.csv');
+
 INIA_Dur(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0);
 INIA_Dur(1).temp = INIAData(:,5);
 INIA_Dur(1).hum = INIAData(:,6);
@@ -117,7 +133,9 @@ INIA_Dur(1).srad = INIAData(:,10);
 %INIA Salto Grande.
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA Salto Grande')
-INIAData = odsread('../clima/INIA_SG.ods',1,'a5:j27120');
+drawnow
+%INIAData = odsread('INIA_SG.ods',1,'a5:j27120');
+INIAData = csvread('INIA_SG.csv');
 INIA_SG(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0) ;
 INIA_SG(1).temp = INIAData(:,5);
 INIA_SG(1).hum = INIAData(:,6);
@@ -128,7 +146,9 @@ INIA_SG(1).srad = INIAData(:,10);
 %Inia Rocha
 %Arrange xls file as follows: Timestamp, year, temp, humidity, windspeed <msec>, rain, srad
 disp('Reading climate data for INIA Rocha')
-INIAData = odsread('../clima/INIA_RO.ods',1,'a5:j7784');
+drawnow
+%INIAData = odsread('INIA_RO.ods',1,'a5:j7784');
+INIAData = csvread('INIA_RO.csv');
 INIA_RO(1).timestamp = datenum(INIAData(:,3),INIAData(:,1),INIAData(:,2),INIAData(:,4),0,0);
 INIA_RO(1).temp = INIAData(:,5);
 INIA_RO(1).hum = INIAData(:,6);
@@ -139,7 +159,7 @@ INIA_RO(1).srad = INIAData(:,10);
 clear INIAData
 
 %%Now that I have imported everything, save contents to a MAT file
-save('./dataFiles/INIAClimate.mat','INIA_LE','INIA_LB','INIA_33','INIA_Tbo','INIA_Dur','INIA_Gle','INIA_SG','INIA_RO');
+save('INIAClimateOctave.mat','INIA_LE','INIA_LB','INIA_33','INIA_Tbo','INIA_Dur','INIA_Gle','INIA_SG','INIA_RO');
 disp ('Complete successfuly')
 
 %EOF

@@ -139,7 +139,7 @@ INIA_RO(1).srad = INIAData(:,10);
 clear INIAData
 
 %%Now that I have imported everything, save contents to a MAT file
-save('./dataFiles/INIAClimate.mat','INIA_LE','INIA_LB','INIA_33','INIA_Tbo','INIA_Dur','INIA_Gle','INIA_SG','INIA_RO');
+save('./dataFiles/INIAClimateMATLAB.mat','INIA_LE','INIA_LB','INIA_33','INIA_Tbo','INIA_Dur','INIA_Gle','INIA_SG','INIA_RO');
 disp ('Complete successfuly')
 
 %EOF
