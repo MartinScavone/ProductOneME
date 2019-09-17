@@ -2,6 +2,7 @@
 %%%% - M.E. Pavement Design tool - %%%%
 %%%% - - - MAIN ROUTINE CODE - - - %%%%
 %
+% Version 1.0 30th... pre-Release          - 2019-09-16 
 % Version 0.5 Many changes everywhere!     - 2019-05-20
 % Version 0.3 MR Routine added             - 2019-01-22
 % Version 0.2 Win-Friendly/Octave-Friendly - 2018-10-19
@@ -231,8 +232,7 @@ MR = zeros(termination,1+paveLayersNumber-ACLayersNumber);  %prepare matrix for 
 %INITIALIZE VARIABLES - distress
 rutDepth=zeros(termination,1+length(paveDepths));           % for each layer, and all summed up! metric Units [m]
 alligatorCrack = zeros(termination,ACLayersNumber);   % units: percentage of lane area
-% topDownCrack = zeros(termination,ACLayersNumber);     % units: m/km  [MEPDG's are ft/mile]  update v2019-05-19, only 1 record of topDownCracking (at the surface)
-topDownCrack = zeros(termination,1);     % units: m/km  [MEPDG's are ft/mile]
+ topDownCrack = zeros(termination,1);     % units: m/km  [MEPDG's are ft/mile]  V-2019-09-16 PRE-RELEASE:: DISABLE TOP-DN CRACKING [keep a vector of zeros not to modify the IRI function] (MEPDG'S MODEL IS NOT WORKING PROPERLY, NEEDS FURTHER INVESTIGATION)
 % reflectiveCrack = zeros(termination,1);  % units: percentage of lane area
 % transvCrack = zeros(termination,1);      % units: m/km - DISREGARDED AS THESE ARE DUE TO COLD WEATHER AND WOULD'NT OCCUR IN A WARM CLIMATE (SHOWN BY CALIENDO, 2012))
 
@@ -270,9 +270,6 @@ for k = 1:termination
   % MLEFrontEnd scrtipt is in elasticLinearAnalysis folder
   run 'MLEFrontEnd.m'  
   
-  if k==2
-      disp('stop here!')
-  end
   
    %% Calculate distress increase
   if runVerbose
@@ -316,7 +313,10 @@ if createFigures(3)>0
 end
 if createFigures(4)>0   
      plotted4142 = plotRutDepth(shortTimestamp,rutDepth);
-     plotted4344 = plotAlligator(shortTimestamp,alligatorCrack,topDownCrack);
+%    plotted4344 =
+%    plotAlligator(shortTimestamp,alligatorCrack,topDownCrack);
+%    %V2019-09-16: disabled topDown cracking export!
+     plotted4344 = plotAlligator(shortTimestamp,alligatorCrack);    
      plotted45 = plotIRIPSI(shortTimestamp,IRI,PSI);
 end
 % if createFigures(5)>0
