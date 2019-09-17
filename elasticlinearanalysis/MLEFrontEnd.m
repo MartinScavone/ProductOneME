@@ -77,7 +77,7 @@ if k ==1
     %%for single 6 ton
     sigmaZsingle6 = zeros(length(z),nrs6,length(axlesSingle6Weights),termination);
     % sigmaRsingle6 = zeros(length(z),nrs6,length(axlesSingle6Weights));
-    sigmaTsingle6 = zeros(length(z),nrs6,length(axlesSingle6Weights),termination);
+%     sigmaTsingle6 = zeros(length(z),nrs6,length(axlesSingle6Weights),termination);
     sigmaXsingle6 = zeros(length(z),nrs6,length(axlesSingle6Weights),termination);
     sigmaYsingle6 = zeros(length(z),nrs6,length(axlesSingle6Weights),termination);
     tauXYsingle6 = zeros(length(z),nrs6,length(axlesSingle6Weights),termination);

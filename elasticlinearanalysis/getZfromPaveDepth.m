@@ -17,6 +17,8 @@ function [ z ] = getZfromPaveDepth(paveDepth)
 % each layer (until top of subgrade), and a point 15cm underneath the
 % subgrade surface]
 %
+% V0.4: Friday the 13th: 2019-09-13 - - corrected evaluation points at the bottom of each layer, force them to be slightly above interface for the MLE to compute
+% on the upper layers.
 % V0.3: 2019-04-03 - - added a z(subgrade)+0.02m point - needed to compute strain decay in the subgrade for rutting purposes.
 % V0.2: 2019-02-22 - - removed the z = 0.01m point (not needed at all).
 % V0.1: 2019-02-07
@@ -27,6 +29,11 @@ function [ z ] = getZfromPaveDepth(paveDepth)
 paveDepth = paveDepth(1:end-1);  %remove the maybe artificial subgrade thickness
 paveDepth = paveDepth(:);        %fix as column vector
 z = 0.01*cumsum(paveDepth);      %convert to depths
+
+%Update V2019-09-13: Get the depth of all layers interfaces
+%minus 0.01m to force the MLE calculator to go to the upper layer at each
+%interface
+z = z-0.002;
 
 %add midpoints. Use this workaround: https://www.mathworks.com/matlabcentral/answers/25536-selecting-mid-points
 z = [z;conv(z,[0.5;0.5],'valid')];
