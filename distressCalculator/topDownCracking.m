@@ -1,4 +1,4 @@
-function [alligatorNi,alligatorDamage] = topDownCracking(MLEstrain, axlePasses,z,HMAlayerDepth,EDyn,HMAProperties)
+function [alligatorNi,alligatorDamage] = topDownCracking(MLEstrain, axlePasses,~,HMAlayerDepth,EDyn,HMAProperties)
 %function  [topDownNi,topDownDamage] = topDownCracking(MLEstrain, axlePasses,z,layerDepth,EDyn,HMAProperties)
 %
 %compute the degree of TOP-DOWN cracking  damage on each HMA layer for a given axle type
@@ -7,12 +7,12 @@ function [alligatorNi,alligatorDamage] = topDownCracking(MLEstrain, axlePasses,z
 %Use MEPDG's original equations(eqns. 3.3.29/30 and so on). See Pt3 Chapter 3 of NCHRP 2004.
 %
 %Inputs
-% MLEstrain,   MAx horizontal strain matrix at each (z,r) location -as computed by the MLE
-% axlePasses,  number of axle passes in the period of interest
-% z            vector of depths tied to MLEStrain     [m]
-% HMAlayerDepth   vector stating the thickness of the HMA layers [cm]
-% EDyn         dynamic modulus [in PSI] for the HMA layers for the given axle type and load value (compatible with MLEStrain) AT A SINGLE TIMESTAMP (t(k)).
-% HMAPropertiesVector with the Mix properties for the HMA layers as imported from the dataImport sheet. Need Air voids and bitumen content in perc. volume
+% MLEstrain,     MAx horizontal strain matrix at each (z,r) location -as computed by the MLE
+% axlePasses,    number of axle passes in the period of interest
+% z (~)          vector of depths tied to MLEStrain     [m]
+% HMAlayerDepth  vector stating the thickness of the HMA layers [cm]
+% EDyn           dynamic modulus [in PSI] for the HMA layers for the given axle type and load value (compatible with MLEStrain) AT A SINGLE TIMESTAMP (t(k)).
+% HMAProperties  Vector with the Mix properties for the HMA layers as imported from the dataImport sheet. Need Air voids and bitumen content in perc. volume
 % 
 %Outputs
 % topDownNi     [size numHMALayers x numLoadLevels]: number of admissible passes for HMA layer (i) and load level (j)
@@ -24,6 +24,9 @@ function [alligatorNi,alligatorDamage] = topDownCracking(MLEstrain, axlePasses,z
 %THIS IS THE "UNCALLIBRATED" VERSION OF THE RUTTING MODEL, THE EQUATIONS
 %WERE PROGRAMMED HEREIN AS THEY HAVE BEEN REPORTED IN THE MEPDG GUIDE.
 %THE CALLIBRATION EFFORT MAY EVENTUALLY LEAD TO RE-WRITING THIS COMPUTER CODE!
+%
+% ============= AS OF 2019-09-17: FUNCTION DISABLED TO ALLOW FOR FURTHER INVESTIGATION ON
+% WHAT MODELING EXISTS TO COMPUTE TOP/DN CRACKING! ===================
 %
 %V0.4 - 2019-05-20
 %   Changelog: CORRECTED  EQUATION FOR K1 PARAMETER FOR TOP-DOWN CRACKING.
@@ -52,22 +55,12 @@ HMAlayerDepth = HMAlayerDepth*.01;   %%convert from cm to meters to compare with
 HMAlayerDepth = cumsum(HMAlayerDepth); %and convert thickness to depth.
 %UPDATE V2019-05-20: k1 equation corrected WITH MEPDG'S APPENDIX II EQN 27.
 %%K1 EQN. patched v2019-04-04. Since HMAlayerDepth is cumsummed above, the last entry is the total HMA layer depth!
-k1            = 0.0001 + 29.844*(1+exp(30.544-5.7357*(HMAlayerDepth(end))/0.0254))^(-1);  
+k1            = 0.01 + 12.00*(1+exp(15.676-2.8186*(HMAlayerDepth(end))/0.0254))^(-1);  
 k1            = 1/k1;             %parameter k1 FOR TOP-DN CRACKING. AS PER EQUATION 27 in mepdg's appendix II (the one in P3.c3 of the MEPDG is WRONG!).
 %NOTE: k1 is a scalar (or should be...)
 
 %Locate the MLE strain rows that correspond to the base of the HMA layers.
-% strainHMA = MLEstrain(z==HMAlayerDepth,:,:);   %get the strain values where z is the base of the HMA layers, all r positions and all levels of load!
-auxPosZ = zeros(length(HMAlayerDepth),1);
-for i = 1:length(HMAlayerDepth)
-    aux = find(abs(z-HMAlayerDepth(i))<0.001);
-    if ~isempty(aux)
-        auxPosZ(i)  = aux;
-    end
-end
-
-%%updateV2019-05-19: Remove all calculations an do the math for z = first
-%%location (surface of pavement)
+%updateV2019-05-19: Remove all calculations an do the math for z = first location (surface of pavement)
 
 strainHMA = MLEstrain(1,:,:);   %<<UPDATED get the strain values at the pavement surface, all r positions and all levels of load!
 

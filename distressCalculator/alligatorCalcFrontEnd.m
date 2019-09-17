@@ -13,6 +13,9 @@
 % BOTH ARE COMPUTED WITH THE MEPDG'S RE-FIT OF THE ASPHALT INSTITUTE
 % EQUATIONS (DEFAULT CALLIBRATION PARAMETERS)
 %
+%V0.3 2019-09-17 -  The 30th
+%   Changelog: diabled top-down cracking calculations to allow for further
+%   investigation in proper top-dn crack modeling.%
 %V0.2 2019-05-20
 %   Changelog: topDownDamage variables to have only 1 column
 %   (representative of distress calculation at the surface only)
@@ -32,13 +35,13 @@ if k ==1
     bottomUpDamageTandem18 = zeros(termination,ACLayersNumber);
     bottomUpDamageTridem   = zeros(termination,ACLayersNumber);    
     
-    topDownDamageSingleL  = zeros(termination,1);
-    topDownDamageSingle6  = zeros(termination,1);
-    topDownDamageSingle10 = zeros(termination,1);
-    topDownDamageTandem10 = zeros(termination,1);
-    topDownDamageTandem14 = zeros(termination,1);
-    topDownDamageTandem18 = zeros(termination,1);
-    topDownDamageTridem   = zeros(termination,1);       
+%     topDownDamageSingleL  = zeros(termination,1);
+%     topDownDamageSingle6  = zeros(termination,1);
+%     topDownDamageSingle10 = zeros(termination,1);
+%     topDownDamageTandem10 = zeros(termination,1);
+%     topDownDamageTandem14 = zeros(termination,1);
+%     topDownDamageTandem18 = zeros(termination,1);
+%     topDownDamageTridem   = zeros(termination,1);       
 end
 
 
@@ -94,30 +97,28 @@ end
 %% PART 2 - - - TOP DOWN ALLIGATOR CRACKING
 %% compute the degree of damage for each axle type
 %%%PASS TO FUNCTION "topDownCracking" for every axle type
-[~, auxDamage] = topDownCracking(epsHSingleLk, axlesSingleLight(k,:),z,ACPaveDepth(:),EDynSingleLight(:,:,k),HMAparameters);
-topDownDamageSingleL(k,:) = auxDamage';
-[~, auxDamage] = topDownCracking(epsHSingle6k, axlesSingle6(k,:),z,ACPaveDepth(:),EDynSingle6(:,:,k),HMAparameters);
-topDownDamageSingle6(k,:) = auxDamage';
-[~, auxDamage] = topDownCracking(epsHSingle10k, axlesSingle105(k,:),z,ACPaveDepth(:),EDynSingle105(:,:,k),HMAparameters);
-topDownDamageSingle10(k,:) = auxDamage';
-[~, auxDamage] = topDownCracking(epsHTandem10k, axlesTandem10(k,:),z,ACPaveDepth(:),EDynTandem10(:,:,k),HMAparameters);
-topDownDamageTandem10(k,:) = auxDamage';
-[~, auxDamage] = topDownCracking(epsHTandem14k, axlesTandem14(k,:),z,ACPaveDepth(:),EDynTandem14(:,:,k),HMAparameters);
-topDownDamageTandem14(k,:) = auxDamage';
-[~, auxDamage] = topDownCracking(epsHTandem18k, axlesTandem18(k,:),z,ACPaveDepth(:),EDynTandem18(:,:,k),HMAparameters);
-topDownDamageTandem18(k,:) = auxDamage';
-[~, auxDamage] = topDownCracking(epsHTridemk, axlesTridem(k,:),z,ACPaveDepth(:),EDynTridem(:,:,k),HMAparameters);
-topDownDamageTridem(k,:) = auxDamage';
+% [~, auxDamage] = topDownCracking(epsHSingleLk, axlesSingleLight(k,:),z,ACPaveDepth(:),EDynSingleLight(:,:,k),HMAparameters);
+% topDownDamageSingleL(k,:) = auxDamage';
+% [~, auxDamage] = topDownCracking(epsHSingle6k, axlesSingle6(k,:),z,ACPaveDepth(:),EDynSingle6(:,:,k),HMAparameters);
+% topDownDamageSingle6(k,:) = auxDamage';
+% [~, auxDamage] = topDownCracking(epsHSingle10k, axlesSingle105(k,:),z,ACPaveDepth(:),EDynSingle105(:,:,k),HMAparameters);
+% topDownDamageSingle10(k,:) = auxDamage';
+% [~, auxDamage] = topDownCracking(epsHTandem10k, axlesTandem10(k,:),z,ACPaveDepth(:),EDynTandem10(:,:,k),HMAparameters);
+% topDownDamageTandem10(k,:) = auxDamage';
+% [~, auxDamage] = topDownCracking(epsHTandem14k, axlesTandem14(k,:),z,ACPaveDepth(:),EDynTandem14(:,:,k),HMAparameters);
+% topDownDamageTandem14(k,:) = auxDamage';
+% [~, auxDamage] = topDownCracking(epsHTandem18k, axlesTandem18(k,:),z,ACPaveDepth(:),EDynTandem18(:,:,k),HMAparameters);
+% topDownDamageTandem18(k,:) = auxDamage';
+% [~, auxDamage] = topDownCracking(epsHTridemk, axlesTridem(k,:),z,ACPaveDepth(:),EDynTridem(:,:,k),HMAparameters);
+% topDownDamageTridem(k,:) = auxDamage';
 
 %% compute the degree of top down cracking for all layers at timestamp K
 % topDownCrack = zeros(termination,ACLayersNumber);     % units: m/km
 % [MEPDG's are ft/mile]. 1 m/km = 1.61/0.305 ft/mi
+% 
+% cummDamage = zeros(1,1);
+%     cummDamage = sum(topDownDamageSingleL(1:k,1)) + sum(topDownDamageSingle6(1:k,1)) + sum(topDownDamageSingle10(1:k,1)) + ...
+%         sum(topDownDamageTandem10(1:k,1)) + sum(topDownDamageTandem14(1:k,1)) + sum(topDownDamageTandem18(1:k,1)) + sum(topDownDamageTridem(1:k,1));
+%     topDownCrack(k,1) = 10.56*1000.*(1+exp(7.0 - 3.5.*log10(100*cummDamage))).^-1;
+%     topDownCrack(k,1) = 0.305/1.61.*topDownCrack(k,1);    %%convert ft/mi --> m/km
 
-cummDamage = zeros(1,1);
-% for i = 1:ACLayersNumber UPDATE V2019-05-09. ONLY COMPUTE TOPDOWNCRACKING AT THE SURFACE!
-for i = 1:1
-    cummDamage(i) = sum(topDownDamageSingleL(1:k,i)) + sum(topDownDamageSingle6(1:k,i)) + sum(topDownDamageSingle10(1:k,i)) + ...
-        sum(topDownDamageTandem10(1:k,i)) + sum(topDownDamageTandem14(1:k,i)) + sum(topDownDamageTandem18(1:k,i)) + sum(topDownDamageTridem(1:k,i));
-    topDownCrack(k,i) = 10.56*1000.*(1+exp(7.0 - 3.5.*log10(100*cummDamage(i)))).^-1;
-    topDownCrack(k,i) = 0.305/1.61.*topDownCrack(k,i);    %%convert ft/mi --> m/km
-end

@@ -54,7 +54,7 @@ k1            = 1/k1;             %parameter k1 FOR BOTTOM-UP CRACKING. AS PER E
 %Locate the MLE strain rows that correspond to the base of the HMA layers.
 auxPosZ = zeros(length(HMAlayerDepth),1);
 for i = 1:length(HMAlayerDepth)
-    aux = find(abs(z-HMAlayerDepth(i))<0.001);
+    aux = find(abs(z-HMAlayerDepth(i))<0.01);
     if ~isempty(aux)
         auxPosZ(i)  = aux;
     end
