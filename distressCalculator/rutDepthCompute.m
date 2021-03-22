@@ -31,6 +31,9 @@
 %WERE PROGRAMMED HEREIN AS THEY HAVE BEEN REPORTED IN THE MEPDG GUIDE.
 %THE CALLIBRATION EFFORT MAY EVENTUALLY LEAD TO RE-WRITING THIS COMPUTER CODE!
 %
+%V0.8 - 2021-03-11
+%   Changelog: Corrected the search for auxPosZ (it was going out of
+%   tolerance and thus returning nothing and crashing the code).
 %v0.7 - 2019-05-21
 %   Changelog: stability correction for granular materials and subgrade: At
 %   times the epl/ez ratio to compute Neq gives an impossible Neq number
@@ -81,7 +84,8 @@ for i = 1:length(layerDepthHMA)
     else
         midpointsHMA(i) = sum(layerDepthHMA(1:i-1))+0.5*layerDepthHMA(i);  
     end
-    aux                 = find(abs(z-midpointsHMA(i)*0.0254)<0.001);
+    aux                 = find(abs(z-midpointsHMA(i)*0.0254)== min(abs(z-midpointsHMA(i)*0.0254)));
+    aux = aux(1);
     if ~isempty(aux)
         auxPosZ(i)      = aux;
     end
@@ -138,7 +142,8 @@ for i = 1:length(layerDepthGranular)
     else
        midpointsGranular(i) = auxTotalDepthHMA + sum(layerDepthGranular(1:i-1)) + 0.5*layerDepthGranular(i);    
     end
-    aux                 = find(abs(z-midpointsGranular(i)*0.0254)<0.001);
+    aux                 = find(abs(z-midpointsHMA(i)*0.0254)== min(abs(z-midpointsHMA(i)*0.0254)));
+    aux = aux(1);
     if ~isempty(aux)
         auxPosZ(i)      = aux;
     end
